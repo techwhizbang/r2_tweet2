@@ -1,0 +1,17 @@
+= r2_tweet2
+  
+== Instructions
+
+
+== Installation
+
+  ruby script/plugin install git://github.com/techwhizbang/r2_tweet2.git
+
+== Usage
+
+=== Prepare database
+
+=== Other
+
+Problems, comments, and suggestions all welcome. techwhizbang@gmail.com or visit my blog
+http://techwhizbang.com

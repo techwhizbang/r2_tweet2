@@ -1,0 +1,32 @@
+development:
+  user_agent: r2_tweet2_plugin_agent
+  client_app: r2_tweet2_development
+  client_url: http://github.com/techwhizbang/r2_tweet2
+  user: r2_tweet2_plgin
+  password: r2_plugin_123
+  proxy_host:
+  proxy_port:
+  proxy_pass:
+  proxy_user:
+
+test:
+  user_agent: r2_tweet2_plugin_agent
+  client_app: r2_tweet2_development
+  client_url: http://github.com/techwhizbang/r2_tweet2
+  user: r2_tweet2_plgin
+  password: r2_plugin_123
+  proxy_host: test.com
+  proxy_port: 5000
+  proxy_pass: proxy_pass
+  proxy_user: proxy_user
+
+production:
+  user_agent: r2_tweet2_plugin_agent
+  client_app: r2_tweet2_development
+  client_url: http://github.com/techwhizbang/r2_tweet2
+  user: r2_tweet2_plgin
+  password: r2_plugin_123
+  proxy_host:
+  proxy_port:
+  proxy_pass:
+  proxy_user:
