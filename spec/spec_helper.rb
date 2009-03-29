@@ -21,6 +21,7 @@ def net_http_block_stub(response, obj_stubs = {})
   http.stub!(:request).and_return(response)
   http.stub!(:start).and_yield(http)
   http.stub!(:use_ssl=)
+  http.stub!(:set_form_data)
   http.stub!(:verify_mode=)
   http
 end

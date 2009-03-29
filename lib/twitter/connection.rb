@@ -23,12 +23,14 @@ module Twitter
 
     def handle_response(response)
       unless response.is_a?(Net::HTTPSuccess)
-        raise ConnectionException.new(response)
+        raise ConnectionException.new(response.message + " " + response.code.to_s)
       end
     end
 
     # Returns the response of the HTTP connection.
-    def http_connect(form_data = nil, require_auth = false, user = nil, password = nil, &block)
+    def http_connect(form_data = nil, require_auth = false, 
+                                      user = Twitter::Config.user,
+                                      password = Twitter::Config.password, &block)
     	raise "block is required" unless block_given?
     	@http.start do |connection|
     		request = yield connection if block_given?
@@ -41,7 +43,7 @@ module Twitter
     end
 
     def create_http_get_request(params = {})
-    	path = (params.size > 0) ? "#{@url.path}?#{params.to_query}" : uri
+    	path = (params.size > 0) ? "#{@url.path}?#{params.to_query}" : @url.path
       Net::HTTP::Get.new(path, http_header)
     end
 
@@ -50,7 +52,7 @@ module Twitter
     end
 
     def create_http_delete_request(params = {})
-    	path = (params.size > 0) ? "#{@url.path}?#{params.to_query}" : uri
+    	path = (params.size > 0) ? "#{@url.path}?#{params.to_query}" : @url.path
     	Net::HTTP::Delete.new(path, http_header)
     end
 
