@@ -19,7 +19,7 @@ module Twitter
       form_data.merge!({'source' => options[:source]}) if options[:source]
       form_data.merge!({'in_reply_to_status_id' => options[:in_reply_to_status_id]}) if options[:in_reply_to_status_id]
       connection = Connection.new STATUSES_UPDATE, options[:format]
-      response = connection.http_connect(form_data, true, @user, @password) { |conn| connection.create_http_post_request }
+      response = connection.http_connect(form_data, true, @user, @password) { connection.create_http_post_request }
       response_conversion(response.body, options[:format])
     end
     alias :post :update

@@ -35,7 +35,7 @@ module Twitter
     	@http.start do |connection|
     		request = yield connection if block_given?
     		request.basic_auth(user, password) if require_auth
-        request.set_form_data(form_data)
+        request.set_form_data(form_data) if form_data
     		response = connection.request(request)
     		handle_response(response)
     		response
