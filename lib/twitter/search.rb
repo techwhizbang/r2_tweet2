@@ -86,7 +86,7 @@ module Twitter
     def fetch(format = :json)
       @query[:q] = @query[:q].join(' ') if @query[:q].is_a?(Array)
       connection = Connection.new SEARCH, format
-      response = connection.http_connect {|conn| connection.create_http_get_request(@query) }
+      response = connection.http_connect { connection.create_http_get_request(@query) }
       response_conversion(response.body, format)
     end
 
