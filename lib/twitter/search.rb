@@ -91,7 +91,7 @@ module Twitter
     end
 
     def each
-      @results = fetch()
+      @results = fetch
       @results.results.each { |r| yield r }
     end
 

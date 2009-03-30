@@ -89,7 +89,50 @@ describe Twitter, "search" do
   end
 
   describe 'search API call' do
+
+    before(:each) do
+      @connection = Twitter::Connection.new Twitter::Search::SEARCH
+      @results = stub('response', :body => {'a' => 'a', 'b' => 'b', 'results' => [{'text' => 'blah'}, {'text' => 'blah'}]}.to_json)
+      @connection.stub!(:http_connect).and_return(@results)
+    end
+
+    it 'should join query search terms if they are an array' do
+      Twitter::Connection.should_receive(:new).and_return(@connection)
+      s = Twitter::Search.new
+      s.containing("blah blah blah")
+      s.query[:q].should_receive(:join)
+      s.fetch
+    end
+
+    it 'should call the response conversion method' do
+      Twitter::Connection.should_receive(:new).and_return(@connection)
+      s = Twitter::Search.new
+      s.containing("blah blah blah")
+      s.should_receive(:response_conversion)
+      s.fetch
+    end
+
+    it 'should return a search result info object if the format is json' do
+      Twitter::Connection.should_receive(:new).and_return(@connection)
+      s = Twitter::Search.new
+      s.containing("blah blah blah")
+      s.fetch.is_a?(Twitter::SearchResultsInfo).should == true
+    end
+
+    it 'should return plain response body if the format isnt json' do
+      Twitter::Connection.should_receive(:new).and_return(@connection)
+      s = Twitter::Search.new
+      s.containing("blah blah blah")
+      s.fetch(:atom).is_a?(Twitter::SearchResultsInfo).should == false
+    end
     
+    it 'should iterate through the search results' do
+      Twitter::Connection.should_receive(:new).and_return(@connection)
+      s = Twitter::Search.new
+      s.containing("blah blah blah")
+      s.each {|r| r.text.should == "blah"}
+    end
+
   end
 
 end
