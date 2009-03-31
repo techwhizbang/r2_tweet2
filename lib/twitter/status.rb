@@ -27,7 +27,7 @@ module Twitter
 
     def response_conversion(body, format)
       response = super(body, format)
-    	StatusResult.new(response)
+    	StatusResult.new(response) if format == :json
     end
   end
 end

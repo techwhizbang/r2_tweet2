@@ -3,18 +3,14 @@ module Twitter
 
     def initialize(hash)
       (class << self; self; end).class_eval do
-        hash.each_pair do |key, value|
-          if key == "results"
-            define_method key.to_sym do
+        hash.each_pair do |key, value| 
+          define_method key.to_sym do
+            if key.to_s == "results"
               results = []
-              value.each do |result|
-                results << SearchResult.new(result)
-              end
+              value.each { |r| results << SearchResult.new(r) }
               results
-            end
-          else
-            define_method key.to_sym do
-              value
+            else
+              value.to_s
             end
           end
         end
