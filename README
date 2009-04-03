@@ -6,8 +6,7 @@ You might be wondering why another Twitter gem/plugin...let me highlight why you
 are constrained to JRuby.
 
 2.) This Twitter plugin doesn't force you to use additional plugins or gems. 
-My viewpoint is I want Twitter without 2, 3, or N number of additional gems or plugins in my application
-just to use this one IF I don't have to.
+My viewpoint is I want Twitter without additional suck/bloat-ware
 
 3.) This Twitter plugin has some nice hooks for ActiveRecord models or just plain
 classes that enable "tweets" based on callbacks.
