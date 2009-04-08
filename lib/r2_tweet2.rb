@@ -1,3 +1,8 @@
+require 'net/http'
+require 'net/https'
+require 'uri'
+require 'yaml'
+
 require File.expand_path(File.dirname(__FILE__) + "/twitter/hash_delegator")
 require File.expand_path(File.dirname(__FILE__) + "/twitter/search_result")
 require File.expand_path(File.dirname(__FILE__) + "/twitter/search_results_info")
@@ -10,7 +15,4 @@ require File.expand_path(File.dirname(__FILE__) + "/twitter/status")
 require File.expand_path(File.dirname(__FILE__) + "/twitter/message")
 require File.expand_path(File.dirname(__FILE__) + "/methods")
 
-require 'net/http'
-require 'net/https'
-require 'uri'
-require 'yaml'
+
