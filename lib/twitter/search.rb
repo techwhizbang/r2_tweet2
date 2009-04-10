@@ -10,18 +10,18 @@ module Twitter
       containing(q) if q && q.strip != ''
     end
 
-    def from(user)
-      @query[:q] << "from:#{user}"
+    def from(user, operator = nil)
+      @query[:q] << ((operator.nil? || @query[:q].size == 0) ? "from:#{user}" : "#{operator} from:#{user}")
       self
     end
 
-    def to(user)
-      @query[:q] << "to:#{user}"
+    def to(user, operator = nil)
+      @query[:q] << ((operator.nil? || @query[:q].size == 0) ? "to:#{user}" : "#{operator} to:#{user}")
       self
     end
 
-    def referencing(user)
-      @query[:q] << "@#{user}"
+    def referencing(user, operator = nil)
+      @query[:q] << ((operator.nil? || @query[:q].size == 0) ? "@#{user}" : "#{operator} @#{user}")
       self
     end
     alias :references :referencing

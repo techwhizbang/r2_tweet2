@@ -85,6 +85,34 @@ describe Twitter, "search" do
       s.containing("ruby on rails").hashed('techwhizbang').to('techwhizbang').from('techwhizbang')
       s.clear.query.should == {:q => []}
     end
+
+    describe 'search operators with OR' do
+
+      it 'should contain multi from users with OR' do
+        s = Twitter::Search.new
+        s.from('techwhizbang', 'OR').from('daveollie', 'OR').from('twitter', 'OR')
+        s.query.should == {:q=>["from:techwhizbang", "OR from:daveollie", "OR from:twitter"]}
+      end
+
+      it 'should contain multi to users with OR' do
+        s = Twitter::Search.new
+        s.to('techwhizbang', 'OR').to('daveollie', 'OR').to('twitter', 'OR')
+        s.query.should == {:q=>["to:techwhizbang", "OR to:daveollie", "OR to:twitter"]}
+      end
+
+      it 'should contain multi ref users with OR' do
+        s = Twitter::Search.new
+        s.ref('techwhizbang', 'OR').ref('daveollie', 'OR').ref('twitter', 'OR')
+        s.query.should == {:q=>["@techwhizbang", "OR @daveollie", "OR @twitter"]}
+      end
+
+      it 'should contain a hybrid of with/out OR' do
+        s = Twitter::Search.new
+        s.from('techwhizbang', 'OR').to('daveollie').ref('twitter', 'OR').from('aberant', "OR")
+        s.query.should == {:q=>["from:techwhizbang", "to:daveollie", "OR @twitter", "OR from:aberant"]}
+      end
+
+    end
     
   end
 

@@ -6,7 +6,7 @@ You might be wondering why another Twitter gem/plugin...let me highlight why you
 are constrained to JRuby.
 
 2.) This Twitter plugin doesn't force you to use additional plugins or gems. 
-My viewpoint is I want Twitter without additional suck/bloat-ware
+My viewpoint is I want Twitter without crufty suck/bloat-ware
 
 3.) This Twitter plugin has some nice hooks for ActiveRecord models or just plain
 classes that enable "tweets" based on callbacks.
@@ -17,15 +17,64 @@ processing.
 I'd like to thank Susan Potter author of the twitter4r gem and John Nunemaker author of the twitter gem
 since I took inspiration from their efforts for various parts of my plugin.
   
-== Instructions
-
-
 == Installation
 
   ruby script/plugin install git://github.com/techwhizbang/r2_tweet2.git
 
+= Configuration
+
+Create a r2_tweet2.yml in your RAILS_ROOT/config directory with your default user
+settings
+
 == Usage
 
+=Search API
+
+#Example 1  - Construct a single user query with a jorts as keywords and a hash
+search = Twitter::Search.new
+search.containing("jorts").from("techwhizbang").hashed("jorts")
+search_results = search.fetch
+
+#Example 2 - Construct a multi-user OR query to pull from many users
+search2 = Twitter::Search.new
+search2.containing("ruby on rails").from("rails", "OR").from("techwhizbang", "OR").from("daveollie", "OR")
+search_results2 = search2.fetch
+
+#There are literally thousands of combinations for searches so crack open the twitter/search.rb
+
+=Status API
+
+#Example 1 - Construct an update with the default user and password config
+status_result = Twitter::Status.new.update("this is a really stupid tweet")
+
+#Example 2 - Construct an update with user and password as args
+status_result2 = Twitter::Status.new("user", "password").update("blah blah blah")
+
+=ActiveRecord/Class Methods
+
+#send a status update/tweet when a new post is saved based on attributes or instance methods
+class Post < ActiveRecord::Base
+  r2_tweet2(:attributes => [:message], :callbacks => [:after_save])
+end
+
+class Post < ActiveRecord::Base
+  r2_tweet2(:attributes => [:formatted_message], :callbacks => [:after_save])
+
+  def formatted_message
+    "This is the formatted message #{message}"
+  end
+end
+
+class PlainOldClass
+  include Twitter::R2Tweet2
+  attr_accessor :author, :brief
+  r2_tweet2(:attributes => ['author, 'brief'])
+
+  def update
+    #...do whatever logic
+    tweet
+  end
+end
 
 === Other
 
