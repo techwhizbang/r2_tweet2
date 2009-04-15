@@ -11,33 +11,59 @@ module Twitter
     end
 
     def from(user, operator = nil)
-      @query[:q] << ((operator.nil? || @query[:q].size == 0) ? "from:#{user}" : "#{operator} from:#{user}")
+      if operator.nil?
+        @query[:q] << "from:#{user}"
+      else
+        @query[:or] << (@query[:or].size == 0 ? "from:#{user}" : "#{operator} from:#{user}")
+      end
+
       self
     end
 
     def to(user, operator = nil)
-      @query[:q] << ((operator.nil? || @query[:q].size == 0) ? "to:#{user}" : "#{operator} to:#{user}")
+      if operator.nil?
+        @query[:q] << "to:#{user}"
+      else
+        @query[:or] << (@query[:or].size == 0 ? "to:#{user}" : "#{operator} to:#{user}")
+      end
+  
       self
     end
-
+  
     def referencing(user, operator = nil)
-      @query[:q] << ((operator.nil? || @query[:q].size == 0) ? "@#{user}" : "#{operator} @#{user}")
+      if operator.nil?
+        @query[:q] << "@#{user}"
+      else
+        @query[:or] << (@query[:or].size == 0 ? "@#{user}" : "#{operator} @#{user}")
+      end
+
       self
     end
     alias :references :referencing
     alias :ref :referencing
 
-    def containing(word)
-      @query[:q] << "#{word}"
+    def containing(word, operator = nil)
+      if operator.nil?
+        @query[:q] << "#{word}"
+      else
+        @query[:or] << (@query[:or].size == 0 ? "#{word}" : "#{operator} #{word}")
+      end
+
       self
     end
     alias :contains :containing
 
     # adds filtering based on hash tag ie: #twitter
-    def hashed(tag)
-      @query[:q] << "##{tag}"
+    def hashed(tag, operator = nil)
+      if operator.nil?
+        @query[:q] << "##{tag}"
+      else
+        @query[:or] << (@query[:or].size == 0 ? "##{tag}" : "#{operator} ##{tag}")
+      end
+ 
       self
     end
+    alias :hash :hashed
 
     # lang must be ISO 639-1 code ie: en, fr, de, ja, etc.
     #
@@ -78,13 +104,13 @@ module Twitter
     # Clears all the query filters to make a new search
     def clear
       @query = {}
-      @query[:q] = []
+      @query[:q], @query[:or] = [], []
       self
     end
 
     # If you want to get results do something other than iterate over them.
     def fetch(format = :json)
-      @query[:q] = @query[:q].join(' ') if @query[:q].is_a?(Array)
+      combine_queries
       connection = Connection.new SEARCH, format
       response = connection.http_connect { connection.create_http_get_request(@query) }
       response_conversion(response.body, format)
@@ -96,8 +122,21 @@ module Twitter
     end
 
     def response_conversion(body, format = :json)
-      response = super(body, format)
+      response = super body, format
       SearchResultsInfo.new(response) if format == :json
+    end
+
+    protected
+
+    def combine_queries
+      if @query[:q].is_a?(Array) and @query[:or].is_a?(Array)
+        if !@query[:or].blank?
+          @query[:q] = @query[:q].blank? ? @query[:or].join(' ') : @query[:q].join(' ') + " OR " + @query[:or].join(' ')    
+        else
+          @query[:q] = @query[:q].join(' ')
+        end
+      end
+      @query[:q]
     end
   end
 end

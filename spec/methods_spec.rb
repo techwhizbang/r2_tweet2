@@ -10,11 +10,14 @@ def setup_db
 end
 
 class FakeTweetRecord < ActiveRecord::Base
-  r2_tweet2(:attributes => [:message, :title], :callbacks => [:after_save, :after_destroy])
+  r2_tweet2 :attributes => [:message, :title],
+            :callbacks => [:after_save, :after_destroy],
+            :include => [:tweet]
 end
 
 class SomeTweetRecord < ActiveRecord::Base
-  r2_tweet2(:attributes => ['message', 'title'])
+  r2_tweet2 :attributes => ['message', 'title'],
+            :include => [:tweet]
 end
 
 class PlainOldClass
@@ -55,6 +58,14 @@ describe Twitter::R2Tweet2 do
 
   it 'should assign tweet attribute by string' do
     SomeTweetRecord.r2_tweet2_attributes.should == ['message', 'title']
+  end
+
+  it 'should assign inclusions only if callbacks are specified' do
+    FakeTweetRecord.r2_tweet2_inclusions.should == [:tweet]
+  end
+
+  it 'should not assign inclusions if callbacks are missing' do
+    SomeTweetRecord.r2_tweet2_inclusions.should be_nil
   end
 
   it 'should return a formatted status messsage' do

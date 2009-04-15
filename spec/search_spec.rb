@@ -11,7 +11,7 @@ describe Twitter, "search" do
   end
 
   it 'should initialize a new object with search keywords' do
-    Twitter::Search.new("ruby on rails").query.should == {:q=>["ruby on rails"]}
+    Twitter::Search.new("ruby on rails").query.should == {:q=>["ruby on rails"], :or => []}
   end
 
   it 'should include Enumerable' do
@@ -23,67 +23,67 @@ describe Twitter, "search" do
     it 'should return from and keywords' do
       s = Twitter::Search.new
       s.containing("ruby on rails").from('techwhizbang')
-      s.query.should == {:q=>["ruby on rails", "from:techwhizbang"]}
+      s.query.should == {:q=>["ruby on rails", "from:techwhizbang"], :or => []}
     end
 
     it 'should return to and keywords' do
       s = Twitter::Search.new
       s.containing("ruby on rails").to('techwhizbang')
-      s.query.should == {:q=>["ruby on rails", "to:techwhizbang"]}
+      s.query.should == {:q=>["ruby on rails", "to:techwhizbang"], :or => []}
     end
 
     it 'should return referencing and keywords' do
       s = Twitter::Search.new
       s.containing("ruby on rails").ref('techwhizbang')
-      s.query.should == {:q=>["ruby on rails", "@techwhizbang"]}
+      s.query.should == {:q=>["ruby on rails", "@techwhizbang"], :or => []}
     end
 
     it 'should return hashtag and keywords' do
       s = Twitter::Search.new
       s.containing("ruby on rails").hashed('techwhizbang')
-      s.query.should == {:q=>["ruby on rails", "#techwhizbang"]}
+      s.query.should == {:q=>["ruby on rails", "#techwhizbang"], :or => []}
     end
 
     it 'should return hashtag, to, from, ref, and keywords' do
       s = Twitter::Search.new
       s.containing("ruby on rails").hashed('techwhizbang').to('techwhizbang').from('techwhizbang')
-      s.query.should == {:q=>["ruby on rails", "#techwhizbang", "to:techwhizbang", "from:techwhizbang"]}
+      s.query.should == {:q=>["ruby on rails", "#techwhizbang", "to:techwhizbang", "from:techwhizbang"], :or => []}
     end
 
     it 'should contain per page' do
       s = Twitter::Search.new
       s.per_page(200)
-      s.query.should == {:q=>[], :rpp => 200}
+      s.query.should == {:q=>[], :rpp => 200, :or => []}
     end
 
     it 'should contain page' do
       s = Twitter::Search.new
       s.page(200)
-      s.query.should == {:q=>[], :page => 200}
+      s.query.should == {:q=>[], :page => 200, :or => []}
     end
 
     it 'should contain lang' do
       s = Twitter::Search.new
       s.lang('en')
-      s.query.should == {:q=>[], :lang => 'en'}
+      s.query.should == {:q=>[], :lang => 'en', :or => []}
     end
 
     it 'should contain since' do
       s = Twitter::Search.new
       s.since(12345)
-      s.query.should == {:q=>[], :since_id => 12345}
+      s.query.should == {:q=>[], :since_id => 12345, :or => []}
     end
 
     it 'should contain geocode' do
       s = Twitter::Search.new
       s.geocode(12.23245, 224.234, 50)
-      s.query.should == {:q=>[], :geocode=>"12.23245,224.234,50"}
+      s.query.should == {:q=>[], :geocode=>"12.23245,224.234,50", :or => []}
     end
 
     it 'should clear the query out' do
       s = Twitter::Search.new
       s.containing("ruby on rails").hashed('techwhizbang').to('techwhizbang').from('techwhizbang')
-      s.clear.query.should == {:q => []}
+      s.clear.query.should == {:q => [], :or => []}
     end
 
     describe 'search operators with OR' do
@@ -91,25 +91,53 @@ describe Twitter, "search" do
       it 'should contain multi from users with OR' do
         s = Twitter::Search.new
         s.from('techwhizbang', 'OR').from('daveollie', 'OR').from('twitter', 'OR')
-        s.query.should == {:q=>["from:techwhizbang", "OR from:daveollie", "OR from:twitter"]}
+        s.query.should == {:or=>["from:techwhizbang", "OR from:daveollie", "OR from:twitter"], :q=>[]}
       end
 
       it 'should contain multi to users with OR' do
         s = Twitter::Search.new
         s.to('techwhizbang', 'OR').to('daveollie', 'OR').to('twitter', 'OR')
-        s.query.should == {:q=>["to:techwhizbang", "OR to:daveollie", "OR to:twitter"]}
+        s.query.should == {:or=>["to:techwhizbang", "OR to:daveollie", "OR to:twitter"], :q=>[]}
       end
 
       it 'should contain multi ref users with OR' do
         s = Twitter::Search.new
         s.ref('techwhizbang', 'OR').ref('daveollie', 'OR').ref('twitter', 'OR')
-        s.query.should == {:q=>["@techwhizbang", "OR @daveollie", "OR @twitter"]}
+        s.query.should == {:or=>["@techwhizbang", "OR @daveollie", "OR @twitter"], :q=>[]}
       end
 
       it 'should contain a hybrid of with/out OR' do
         s = Twitter::Search.new
         s.from('techwhizbang', 'OR').to('daveollie').ref('twitter', 'OR').from('aberant', "OR")
-        s.query.should == {:q=>["from:techwhizbang", "to:daveollie", "OR @twitter", "OR from:aberant"]}
+        s.query.should == {:or=>["from:techwhizbang", "OR @twitter", "OR from:aberant"], :q=>["to:daveollie"]} 
+      end
+
+      it 'should contain keywords and a combo of users' do
+        s = Twitter::Search.new
+        s.containing('ruby on rails').from('techwhizbang', "OR").from('daveollie', "OR")
+        s.query.should == {:or=>["from:techwhizbang", "OR from:daveollie"], :q=>["ruby on rails"]}
+      end
+
+    end
+
+    describe 'combine queries' do
+
+      it 'should just return the AND query if there are no OR queries' do
+        s = Twitter::Search.new
+        s.containing('ruby on rails').from('techwhizbang').from('daveollie')
+        s.send(:combine_queries).should == "ruby on rails from:techwhizbang from:daveollie"
+      end
+
+      it 'should combine the OR queries' do
+        s = Twitter::Search.new
+        s.containing('ruby on rails', "OR").from('techwhizbang', "OR").from('daveollie', "OR")
+        s.send(:combine_queries).should == "ruby on rails OR from:techwhizbang OR from:daveollie"
+      end
+
+      it 'should combine both the OR and AND queries' do
+        s = Twitter::Search.new
+        s.containing('ruby on rails').from('techwhizbang', "OR").from('daveollie', "OR").hashed("tech")
+        s.send(:combine_queries).should == "ruby on rails #tech OR from:techwhizbang OR from:daveollie"
       end
 
     end

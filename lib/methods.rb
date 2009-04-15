@@ -6,6 +6,7 @@ module Twitter
       class << base
         attr_accessor :r2_tweet2_attributes
         attr_accessor :r2_tweet2_callbacks
+        attr_accessor :r2_tweet2_inclusions
         attr_accessor :format
       end
     end
@@ -15,12 +16,21 @@ module Twitter
         tweet_options = args[0]
         self.r2_tweet2_attributes = tweet_options[:attributes]
         unless tweet_options[:callbacks].blank?
+          self.r2_tweet2_inclusions = tweet_options[:include]
           self.r2_tweet2_callbacks = tweet_options[:callbacks] 
           self.r2_tweet2_callbacks.each do |callback|
-            self.send(callback.to_sym, :tweet)
+            unless self.r2_tweet2_inclusions.blank?
+              self.r2_tweet2_inclusions.each {|include| self.send(callback.to_sym, include.to_sym) }
+            else
+              self.r2_tweet2_available_methods.each {|method| self.send(callback.to_sym, method.to_sym)}
+            end
           end
         end
         self.format = tweet_options[:format] ||= :json
+      end
+
+      def r2_tweet2_available_methods
+        [:tweet]
       end
     end
 
